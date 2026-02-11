@@ -89,6 +89,10 @@ class ReachyMiniMetronome(ReachyMiniApp):
         # MIDI state
         midi_enabled = False
         midi_handler = MidiHandler()
+        MIDI_IDLE_TIMEOUT = 2.0  # seconds before pausing practice timer
+        midi_paused = False  # practice timer paused due to MIDI idle
+        midi_pause_start = 0.0  # when current pause began
+        midi_pause_accumulated = 0.0  # total paused seconds this session
 
         # Shared lock for camera access across threads
         frame_lock = threading.Lock()
@@ -120,6 +124,7 @@ class ReachyMiniMetronome(ReachyMiniApp):
         def start() -> dict:
             nonlocal is_running, start_time, next_beat_time
             nonlocal current_beat, display_beat, practice_session_start
+            nonlocal midi_paused, midi_pause_start, midi_pause_accumulated
             if not is_running:
                 is_running = True
                 start_time = time.perf_counter()
@@ -127,15 +132,23 @@ class ReachyMiniMetronome(ReachyMiniApp):
                 current_beat = 1
                 display_beat = 1
                 practice_session_start = time.time()
+                midi_paused = False
+                midi_pause_start = 0.0
+                midi_pause_accumulated = 0.0
             return {"running": True}
 
         @self.settings_app.post("/stop")
         def stop() -> dict:
             nonlocal is_running, current_beat, display_beat
             nonlocal practice_total_seconds, practice_session_start
+            nonlocal midi_paused, midi_pause_start, midi_pause_accumulated
             if is_running:
-                session_duration = time.time() - practice_session_start
-                practice_total_seconds += session_duration
+                # Finalize any ongoing MIDI pause
+                if midi_paused:
+                    midi_pause_accumulated += time.time() - midi_pause_start
+                    midi_paused = False
+                session_duration = time.time() - practice_session_start - midi_pause_accumulated
+                practice_total_seconds += max(0.0, session_duration)
                 practice_sessions.append({
                     "duration": round(session_duration, 1),
                     "bpm": bpm,
@@ -151,7 +164,14 @@ class ReachyMiniMetronome(ReachyMiniApp):
         def get_status() -> dict:
             current_session_seconds = 0.0
             if is_running:
-                current_session_seconds = time.time() - practice_session_start
+                pause_now = 0.0
+                if midi_paused:
+                    pause_now = time.time() - midi_pause_start
+                current_session_seconds = (
+                    time.time() - practice_session_start
+                    - midi_pause_accumulated - pause_now
+                )
+                current_session_seconds = max(0.0, current_session_seconds)
             return {
                 "bpm": bpm,
                 "time_signature": time_signature,
@@ -161,6 +181,7 @@ class ReachyMiniMetronome(ReachyMiniApp):
                     "current_session": round(current_session_seconds, 1),
                     "total": round(practice_total_seconds + current_session_seconds, 1),
                     "session_count": len(practice_sessions) + (1 if is_running else 0),
+                    "midi_paused": midi_paused,
                 },
                 "tracking": {
                     "enabled": tracking_enabled,
@@ -187,8 +208,12 @@ class ReachyMiniMetronome(ReachyMiniApp):
         @self.settings_app.post("/practice/reset")
         def reset_practice() -> dict:
             nonlocal practice_total_seconds, practice_session_start
+            nonlocal midi_paused, midi_pause_start, midi_pause_accumulated
             practice_total_seconds = 0.0
             practice_sessions.clear()
+            midi_paused = False
+            midi_pause_start = 0.0
+            midi_pause_accumulated = 0.0
             if is_running:
                 practice_session_start = time.time()
             return {"reset": True}
@@ -353,6 +378,16 @@ class ReachyMiniMetronome(ReachyMiniApp):
                 except Exception:
                     pass  # Skip frame on camera error
 
+            # ── MIDI idle → pause practice timer ──
+            if midi_enabled and is_running and midi_handler.last_note_time > 0:
+                idle = midi_handler.seconds_since_last_note
+                if idle >= MIDI_IDLE_TIMEOUT and not midi_paused:
+                    midi_paused = True
+                    midi_pause_start = time.time()
+                elif idle < MIDI_IDLE_TIMEOUT and midi_paused:
+                    midi_pause_accumulated += time.time() - midi_pause_start
+                    midi_paused = False
+
             # ── MIDI rhythm body/head motion ──
             if midi_enabled and midi_handler.is_open:
                 body_yaw_deg, head_yaw_deg, head_pitch_deg = midi_handler.update(
@@ -377,8 +412,10 @@ class ReachyMiniMetronome(ReachyMiniApp):
             recorder.stop()
 
         if is_running:
-            session_duration = time.time() - practice_session_start
-            practice_total_seconds += session_duration
+            if midi_paused:
+                midi_pause_accumulated += time.time() - midi_pause_start
+            session_duration = time.time() - practice_session_start - midi_pause_accumulated
+            practice_total_seconds += max(0.0, session_duration)
 
         audio.stop(reachy_mini)
 

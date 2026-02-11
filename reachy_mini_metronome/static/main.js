@@ -10,6 +10,7 @@ const sessionTimeEl = document.getElementById('session-time');
 const totalTimeEl = document.getElementById('total-time');
 const sessionCountEl = document.getElementById('session-count');
 const resetBtn = document.getElementById('reset-btn');
+const timerPaused = document.getElementById('timer-paused');
 
 // DOM Elements — Tracking
 const trackingToggleBtn = document.getElementById('tracking-toggle-btn');
@@ -329,6 +330,10 @@ async function getStatus() {
             if (s !== _prevSession) { _prevSession = s; sessionTimeEl.textContent = s; }
             if (t !== _prevTotal) { _prevTotal = t; totalTimeEl.textContent = t; }
             if (c !== _prevCount) { _prevCount = c; sessionCountEl.textContent = c; }
+            // MIDI idle pause indicator
+            const paused = !!d.practice.midi_paused;
+            timerPaused.classList.toggle('visible', paused);
+            sessionTimeEl.style.opacity = paused ? '0.4' : '1';
         }
 
         // Tracking — only update DOM when values actually change

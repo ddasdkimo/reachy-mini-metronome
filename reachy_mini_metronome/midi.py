@@ -60,6 +60,7 @@ class MidiHandler:
         self._last_velocity = 0
         self._last_note_name = ""
         self._notes_count = 0
+        self._last_note_time = 0.0  # time.time() of last Note On
 
     # ── Public properties ──
 
@@ -86,6 +87,17 @@ class MidiHandler:
     @property
     def notes_count(self) -> int:
         return self._notes_count
+
+    @property
+    def last_note_time(self) -> float:
+        return self._last_note_time
+
+    @property
+    def seconds_since_last_note(self) -> float:
+        """Seconds elapsed since the last Note On (0 if no note yet)."""
+        if self._last_note_time == 0.0:
+            return 0.0
+        return time.time() - self._last_note_time
 
     @property
     def body_pos(self) -> float:
@@ -207,6 +219,7 @@ class MidiHandler:
             self._last_velocity = velocity
             self._last_note_name = _note_name(note)
             self._notes_count += 1
+            self._last_note_time = time.time()
 
     def _on_cc(self, control: int, value: int) -> None:
         norm = value / 127.0
