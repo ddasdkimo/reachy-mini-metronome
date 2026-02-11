@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reachy Mini Metronome</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Reachy Metronome</h1>
+            <p class="tagline">Visual & audible tempo keeper with practice timer</p>
+        </div>
+
+        <div class="main-card">
+            <!-- Practice Timer -->
+            <div class="practice-timer">
+                <div class="timer-row">
+                    <div class="timer-block">
+                        <span class="timer-label">Session</span>
+                        <span class="timer-value" id="session-time">00:00</span>
+                    </div>
+                    <div class="timer-divider"></div>
+                    <div class="timer-block">
+                        <span class="timer-label">Total</span>
+                        <span class="timer-value" id="total-time">00:00</span>
+                    </div>
+                    <div class="timer-divider"></div>
+                    <div class="timer-block">
+                        <span class="timer-label">Sessions</span>
+                        <span class="timer-value" id="session-count">0</span>
+                    </div>
+                </div>
+                <button class="reset-btn" id="reset-btn" title="Reset practice timer">Reset</button>
+            </div>
+
+            <!-- BPM Display -->
+            <div class="bpm-display">
+                <span id="bpm-value">120</span>
+                <span class="bpm-label">BPM</span>
+            </div>
+
+            <!-- BPM Slider -->
+            <div class="slider-container">
+                <input type="range" id="bpm-slider" min="40" max="208" value="120" class="bpm-slider">
+                <div class="slider-labels">
+                    <span>40</span>
+                    <span>208</span>
+                </div>
+            </div>
+
+            <!-- Preset Buttons -->
+            <div class="presets">
+                <button class="preset-btn" data-bpm="50">Largo</button>
+                <button class="preset-btn" data-bpm="80">Andante</button>
+                <button class="preset-btn" data-bpm="110">Moderato</button>
+                <button class="preset-btn" data-bpm="140">Allegro</button>
+                <button class="preset-btn" data-bpm="180">Presto</button>
+            </div>
+
+            <!-- Time Signature -->
+            <div class="time-sig-section">
+                <div class="time-sig-display">
+                    <div class="time-sig-value" id="time-sig-value">4/4</div>
+                    <div class="time-sig-label">Time Signature</div>
+                </div>
+                <select id="time-signature" class="time-sig-select">
+                    <option value="2">2/4</option>
+                    <option value="3">3/4</option>
+                    <option value="4" selected>4/4</option>
+                    <option value="5">5/4</option>
+                    <option value="6">6/8</option>
+                </select>
+            </div>
+
+            <!-- Beat Indicator -->
+            <div class="beat-indicator" id="beat-indicator">
+                <div class="beat-dot" data-beat="1"></div>
+                <div class="beat-dot" data-beat="2"></div>
+                <div class="beat-dot" data-beat="3"></div>
+                <div class="beat-dot" data-beat="4"></div>
+            </div>
+
+            <!-- Start/Stop Button -->
+            <button id="toggle-btn" class="toggle-btn">
+                <span class="play-icon">&#9654;</span>
+                <span class="btn-text">START</span>
+            </button>
+        </div>
+
+        <!-- Recording Card -->
+        <div class="recording-card">
+            <div class="recording-header">
+                <h2>Recording</h2>
+                <div class="rec-status" id="rec-status">IDLE</div>
+            </div>
+
+            <div class="rec-controls">
+                <button id="rec-toggle-btn" class="rec-toggle-btn">
+                    <span class="rec-dot"></span>
+                    <span class="rec-btn-text">REC</span>
+                </button>
+                <span class="rec-elapsed" id="rec-elapsed">00:00</span>
+            </div>
+
+            <div class="rec-list" id="rec-list"></div>
+        </div>
+
+        <!-- Hand Tracking Card -->
+        <div class="tracking-card">
+            <div class="tracking-header">
+                <h2>Hand Tracking</h2>
+                <div class="tracking-status" id="tracking-status">OFF</div>
+            </div>
+
+            <button id="tracking-toggle-btn" class="tracking-toggle-btn">
+                <span class="tracking-icon">&#128065;</span>
+                <span class="tracking-btn-text">Enable Tracking</span>
+            </button>
+
+            <div class="tracking-info" id="tracking-info">
+                <div class="tracking-detail">
+                    <span class="tracking-detail-label">Hands</span>
+                    <span class="tracking-detail-value" id="tracking-hands">--</span>
+                </div>
+                <div class="tracking-detail">
+                    <span class="tracking-detail-label">Wrists</span>
+                    <span class="tracking-detail-value" id="tracking-wrists">0</span>
+                </div>
+            </div>
+
+            <div class="smoothing-section">
+                <label class="smoothing-label" for="smoothing-slider">
+                    Smoothing <span id="smoothing-value">0.35</span>
+                </label>
+                <input type="range" id="smoothing-slider" min="5" max="100" value="35" class="smoothing-slider">
+                <div class="slider-labels">
+                    <span>Smooth</span>
+                    <span>Responsive</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Reachy Mini Metronome + Practice Timer + Hand Tracking</p>
+        </div>
+    </div>
+
+    <script src="/static/main.js"></script>
+</body>
+</html>

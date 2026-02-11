@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reachy_mini_metronome"
+version = "0.1.0"
+description = "A visual and audible metronome for Reachy Mini with practice timer tracking"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "reachy-mini",
+    "ultralytics"
+]
+keywords = ["reachy-mini-app"]
+
+[project.entry-points."reachy_mini_apps"]
+reachy_mini_metronome = "reachy_mini_metronome.main:ReachyMiniMetronome"
+
+[tool.setuptools]
+package-dir = { "" = "." }
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+reachy_mini_metronome = ["**/*"]

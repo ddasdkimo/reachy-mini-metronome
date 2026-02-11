@@ -1,0 +1,753 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+}
+
+.container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    color: white;
+    margin-bottom: 1.5rem;
+}
+
+.header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.header .tagline {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.main-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+/* ── Practice Timer ── */
+
+.practice-timer {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    color: white;
+    position: relative;
+}
+
+.timer-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+}
+
+.timer-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+}
+
+.timer-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+    margin-bottom: 0.2rem;
+}
+
+.timer-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: #22d3ee;
+}
+
+.timer-divider {
+    width: 1px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.reset-btn {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.6);
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.reset-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* ── BPM Display ── */
+
+.bpm-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    color: white;
+}
+
+#bpm-value {
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.bpm-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 0.25rem;
+    opacity: 0.9;
+}
+
+/* ── Slider ── */
+
+.slider-container {
+    margin-bottom: 1.5rem;
+}
+
+.bpm-slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: #e5e7eb;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.bpm-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bpm-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
+.bpm-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+/* ── Presets ── */
+
+.presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.preset-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background: white;
+    color: #64748b;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.preset-btn:hover {
+    background: #f0f9ff;
+    color: #0369a1;
+    border-color: #667eea;
+}
+
+/* ── Time Signature ── */
+
+.time-sig-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    background: #f0f9ff;
+    border: 2px solid #bae6fd;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.time-sig-display {
+    text-align: center;
+}
+
+.time-sig-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #0c4a6e;
+    line-height: 1;
+}
+
+.time-sig-label {
+    font-size: 0.75rem;
+    color: #0369a1;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.25rem;
+}
+
+.time-sig-select {
+    padding: 0.5rem 1rem;
+    border: 2px solid #bae6fd;
+    border-radius: 8px;
+    background: white;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0c4a6e;
+    cursor: pointer;
+}
+
+.time-sig-select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* ── Beat Indicator ── */
+
+.beat-indicator {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    padding: 1.25rem;
+    background: #fefce8;
+    border: 2px solid #fde047;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.beat-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #fde68a;
+    border: 3px solid #fbbf24;
+    transition: all 0.1s ease;
+}
+
+.beat-dot.active {
+    background: #eab308;
+    border-color: #ca8a04;
+    box-shadow: 0 0 15px rgba(234, 179, 8, 0.6);
+    transform: scale(1.15);
+    animation: pulse 0.15s ease-out;
+}
+
+.beat-dot.downbeat {
+    background: #f59e0b;
+    border-color: #d97706;
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.7);
+    transform: scale(1.3);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1.15);
+        box-shadow: 0 0 15px rgba(234, 179, 8, 0.5);
+    }
+    50% {
+        transform: scale(1.25);
+        box-shadow: 0 0 25px rgba(234, 179, 8, 0.6);
+    }
+}
+
+/* ── Toggle Button ── */
+
+.toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 1.25rem 2rem;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.35);
+}
+
+.toggle-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.45);
+}
+
+.toggle-btn.running {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.35);
+}
+
+.toggle-btn.running:hover {
+    box-shadow: 0 12px 30px rgba(239, 68, 68, 0.45);
+}
+
+.play-icon {
+    font-size: 1.25rem;
+}
+
+/* ── Recording Card ── */
+
+.recording-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.recording-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.recording-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.rec-status {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #94a3b8;
+}
+
+.rec-status.on {
+    background: #fee2e2;
+    color: #dc2626;
+    animation: rec-pulse 1s ease-in-out infinite;
+}
+
+.rec-status.saving {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+@keyframes rec-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.rec-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.rec-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.5rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    color: #64748b;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.rec-toggle-btn:hover {
+    border-color: #dc2626;
+    color: #dc2626;
+}
+
+.rec-toggle-btn.active {
+    background: #dc2626;
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+}
+
+.rec-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #dc2626;
+    display: inline-block;
+}
+
+.rec-toggle-btn.active .rec-dot {
+    background: white;
+    animation: rec-pulse 1s ease-in-out infinite;
+}
+
+.rec-elapsed {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #1e293b;
+}
+
+.rec-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.rec-empty {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    padding: 0.5rem 0;
+}
+
+.rec-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-top: 1px solid #f1f5f9;
+}
+
+.rec-item:first-child {
+    border-top: none;
+}
+
+.rec-item-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.rec-item-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.rec-item-size {
+    font-size: 0.7rem;
+    color: #94a3b8;
+}
+
+.rec-item-actions {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.rec-dl-btn,
+.rec-del-btn {
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid #e5e7eb;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.rec-dl-btn {
+    background: #f0f9ff;
+    color: #0369a1;
+}
+
+.rec-dl-btn:hover {
+    background: #0369a1;
+    color: white;
+}
+
+.rec-del-btn {
+    background: white;
+    color: #94a3b8;
+}
+
+.rec-del-btn:hover {
+    background: #fef2f2;
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+/* ── Hand Tracking Card ── */
+
+.tracking-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.tracking-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.tracking-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.tracking-status {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #94a3b8;
+}
+
+.tracking-status.on {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.tracking-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.85rem 1.5rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    color: #64748b;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 1rem;
+}
+
+.tracking-toggle-btn:hover {
+    border-color: #667eea;
+    color: #667eea;
+    background: #f0f9ff;
+}
+
+.tracking-toggle-btn.active {
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.tracking-toggle-btn.active:hover {
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.tracking-icon {
+    font-size: 1.1rem;
+}
+
+.tracking-info {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.tracking-detail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tracking-detail-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+    margin-bottom: 0.15rem;
+}
+
+.tracking-detail-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.tracking-detail-value.detected {
+    color: #16a34a;
+}
+
+.tracking-detail-value.not-detected {
+    color: #dc2626;
+}
+
+.smoothing-section {
+    margin-top: 0.5rem;
+}
+
+.smoothing-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0.4rem;
+}
+
+.smoothing-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #e5e7eb;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.smoothing-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #059669, #10b981);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4);
+}
+
+.smoothing-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #059669, #10b981);
+    cursor: pointer;
+    border: none;
+}
+
+/* ── Footer ── */
+
+.footer {
+    text-align: center;
+    color: white;
+    opacity: 0.8;
+    font-size: 0.875rem;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 480px) {
+    body {
+        padding: 1rem 0.5rem;
+    }
+
+    .header h1 {
+        font-size: 1.5rem;
+    }
+
+    .main-card {
+        padding: 1.5rem;
+    }
+
+    #bpm-value {
+        font-size: 3.5rem;
+    }
+
+    .timer-value {
+        font-size: 1.4rem;
+    }
+
+    .timer-block {
+        min-width: 60px;
+    }
+
+    .presets {
+        gap: 0.375rem;
+    }
+
+    .preset-btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    .beat-indicator {
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+
+    .beat-dot {
+        width: 22px;
+        height: 22px;
+    }
+
+    .time-sig-value {
+        font-size: 2rem;
+    }
+}

@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Reachy Mini Metronome</title>
+    <meta name="description" content="A visual and audible metronome for Reachy Mini with practice time tracking." />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="hero">
+        <div class="hero-content">
+            <div class="app-icon">🎵🤖</div>
+            <h1>Reachy Mini Metronome</h1>
+            <p class="tagline">Turn your Reachy Mini into a playful, animated metronome with practice tracking</p>
+        </div>
+    </div>
+    <div class="container">
+        <div class="main-card">
+            <div class="features-section">
+                <h2>Features</h2>
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">🎵</div>
+                        <h3>BPM Control</h3>
+                        <p>Adjustable tempo from 40 to 208 BPM with preset options for common tempos like Largo, Moderato, and Presto.</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🎼</div>
+                        <h3>Time Signatures</h3>
+                        <p>Support for multiple time signatures including 2/4, 3/4, 4/4, 5/4, and 6/8 to match your music.</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🔊</div>
+                        <h3>Accented Downbeats</h3>
+                        <p>Clear audio feedback with a higher-pitched click on beat 1 to help you keep track of measures.</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🤖</div>
+                        <h3>Animated Antennas</h3>
+                        <p>Both antennas swing in mirror motion like a pendulum, giving you a visual beat indicator.</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">⏱️</div>
+                        <h3>Practice Timer</h3>
+                        <p>Track your current session time and total accumulated practice duration across sessions.</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <h3>Session History</h3>
+                        <p>Records each practice session with its BPM and time signature for review.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h2>How It Works</h2>
+            <p>When running, Reachy Mini's antennas swing back and forth in sync with the tempo you've set. Each beat is accompanied by a synthesized click sound played through the robot's speaker, with a distinctive accent on the first beat of each measure.</p>
+            <p>The practice timer starts automatically when you begin the metronome and pauses when you stop. Your total practice time accumulates across sessions so you can track your progress.</p>
+            <p>Use the web interface at <code>http://localhost:8042</code> to control everything in real-time.</p>
+        </div>
+
+        <div class="info-card">
+            <h2>Getting Started</h2>
+            <ol class="steps-list">
+                <li>Start the Reachy Mini daemon on your robot or simulator</li>
+                <li>Go to the dashboard at <code>http://localhost:8000</code></li>
+                <li>Find <strong>Reachy Mini Metronome</strong> in the Applications section and toggle it on</li>
+                <li>Click the gear icon on the app tile, or go directly to <code>http://localhost:8042</code> to open the controls</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Reachy Mini Metronome + Practice Timer</p>
+    </div>
+</body>
+</html>
