@@ -242,9 +242,10 @@ class ReachyMiniMetronome(ReachyMiniApp):
         def stop_tracking() -> dict:
             nonlocal tracking_enabled
             tracking_enabled = False
-            # Return head to neutral
+            # Return head and body to neutral
             head_pose = create_head_pose(yaw=0, pitch=0, degrees=True)
             reachy_mini.set_target(head=head_pose)
+            reachy_mini.set_target(body_yaw=0.0)
             return {"tracking": False}
 
         @self.settings_app.post("/tracking/smoothing")
@@ -370,11 +371,14 @@ class ReachyMiniMetronome(ReachyMiniApp):
                     if frame is not None:
                         result = tracker.process_frame(frame)
                         if result is not None:
-                            yaw, pitch = result
+                            yaw, pitch, body_yaw_deg = result
                             head_pose = create_head_pose(
                                 yaw=yaw, pitch=pitch, degrees=True
                             )
                             reachy_mini.set_target(head=head_pose)
+                            reachy_mini.set_target(
+                                body_yaw=np.deg2rad(body_yaw_deg)
+                            )
                 except Exception:
                     pass  # Skip frame on camera error
 

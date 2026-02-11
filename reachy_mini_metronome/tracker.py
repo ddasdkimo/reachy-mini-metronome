@@ -15,6 +15,9 @@ class HandTracker:
     LEFT_WRIST = 9
     RIGHT_WRIST = 10
 
+    BODY_YAW_MAX_DEG = 30.0  # max body rotation for hand tracking
+    BODY_SMOOTHING = 0.10  # heavier smoothing for stable base rotation
+
     def __init__(self, confidence: float = 0.5, smoothing: float = 0.35):
         self.model = YOLO("yolov8n-pose.pt")
         self.confidence = confidence
@@ -23,13 +26,14 @@ class HandTracker:
         # Smoothed output
         self._yaw = 0.0
         self._pitch = 0.0
+        self._body_yaw = 0.0  # smoothed body yaw (degrees)
 
         # Detection info (exposed to API)
         self.hands_detected = False
         self.num_wrists = 0
 
-    def process_frame(self, frame: np.ndarray) -> tuple[float, float] | None:
-        """Run pose detection and return (yaw_deg, pitch_deg) or None."""
+    def process_frame(self, frame: np.ndarray) -> tuple[float, float, float] | None:
+        """Run pose detection and return (yaw_deg, pitch_deg, body_yaw_deg) or None."""
         results = self.model(frame, verbose=False, conf=self.confidence)
 
         if (
@@ -73,14 +77,19 @@ class HandTracker:
         # Image bottom (norm_y>0) → robot looks down (positive pitch)
         raw_pitch = norm_y * 25.0
 
+        # Body yaw: same direction as head yaw, larger range
+        raw_body_yaw = -norm_x * self.BODY_YAW_MAX_DEG
+
         # Exponential moving average
         self._yaw += self.smoothing * (raw_yaw - self._yaw)
         self._pitch += self.smoothing * (raw_pitch - self._pitch)
+        self._body_yaw += self.BODY_SMOOTHING * (raw_body_yaw - self._body_yaw)
 
-        return (self._yaw, self._pitch)
+        return (self._yaw, self._pitch, self._body_yaw)
 
     def reset(self) -> None:
         self._yaw = 0.0
         self._pitch = 0.0
+        self._body_yaw = 0.0
         self.hands_detected = False
         self.num_wrists = 0
