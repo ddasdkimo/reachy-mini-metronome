@@ -142,8 +142,62 @@
             </div>
         </div>
 
+        <!-- MIDI Controller Card -->
+        <div class="midi-card">
+            <div class="midi-header">
+                <h2>MIDI Controller</h2>
+                <div class="midi-status" id="midi-status">OFF</div>
+            </div>
+
+            <!-- Port Selection -->
+            <div class="midi-port-section">
+                <select id="midi-port-select">
+                    <option value="">Select MIDI Device...</option>
+                </select>
+                <button id="midi-refresh-btn" class="midi-refresh-btn" title="Refresh">&#8635;</button>
+            </div>
+
+            <!-- Connect/Disconnect -->
+            <button id="midi-toggle-btn" class="midi-toggle-btn">
+                <span class="midi-icon">&#127929;</span>
+                <span class="midi-btn-text">Connect</span>
+            </button>
+
+            <!-- MIDI Info -->
+            <div class="midi-info" id="midi-info">
+                <div class="midi-detail">
+                    <span class="midi-detail-label">Last Note</span>
+                    <span class="midi-detail-value" id="midi-note">--</span>
+                </div>
+                <div class="midi-detail">
+                    <span class="midi-detail-label">Velocity</span>
+                    <span class="midi-detail-value" id="midi-velocity">--</span>
+                </div>
+                <div class="midi-detail">
+                    <span class="midi-detail-label">Body</span>
+                    <span class="midi-detail-value" id="midi-body">0.0&deg;</span>
+                </div>
+                <div class="midi-detail">
+                    <span class="midi-detail-label">Notes</span>
+                    <span class="midi-detail-value" id="midi-notes-count">0</span>
+                </div>
+            </div>
+
+            <!-- Amplitude Slider -->
+            <div class="midi-amplitude-section">
+                <label class="midi-amplitude-label">
+                    Sway Amplitude <span id="midi-amp-value">100%</span>
+                </label>
+                <input type="range" id="midi-amp-slider" min="0" max="200" value="100" class="midi-amp-slider">
+                <div class="slider-labels">
+                    <span>Off</span>
+                    <span>200%</span>
+                </div>
+            </div>
+        </div>
+
         <div class="footer">
-            <p>Reachy Mini Metronome + Practice Timer + Hand Tracking</p>
+            <p>Reachy Mini Metronome + Practice Timer + Hand Tracking + MIDI</p>
         </div>
     </div>
 

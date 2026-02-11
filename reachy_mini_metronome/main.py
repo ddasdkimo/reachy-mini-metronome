@@ -21,6 +21,7 @@ from reachy_mini.utils import create_head_pose
 from fastapi.responses import FileResponse
 
 from .audio import MetronomeAudio
+from .midi import MidiHandler
 from .recorder import PracticeRecorder
 from .tracker import HandTracker
 
@@ -34,6 +35,14 @@ class TimeSignatureUpdate(BaseModel):
 
 
 class SmoothingUpdate(BaseModel):
+    value: float
+
+
+class MidiPortSelect(BaseModel):
+    port_name: str
+
+
+class MidiAmplitude(BaseModel):
     value: float
 
 
@@ -76,6 +85,10 @@ class ReachyMiniMetronome(ReachyMiniApp):
         tracking_enabled = False
         tracker: HandTracker | None = None
         last_track_time = 0.0
+
+        # MIDI state
+        midi_enabled = False
+        midi_handler = MidiHandler()
 
         # Shared lock for camera access across threads
         frame_lock = threading.Lock()
@@ -159,6 +172,16 @@ class ReachyMiniMetronome(ReachyMiniApp):
                     "state": recorder.state,
                     "elapsed": round(recorder.elapsed, 1),
                 },
+                "midi": {
+                    "enabled": midi_enabled,
+                    "port": midi_handler.port_name,
+                    "last_note": midi_handler.last_note,
+                    "last_note_name": midi_handler.last_note_name,
+                    "last_velocity": midi_handler.last_velocity,
+                    "body_yaw": round(midi_handler.body_pos, 1),
+                    "notes_count": midi_handler.notes_count,
+                    "amplitude": round(midi_handler.amplitude_mult, 2),
+                },
             }
 
         @self.settings_app.post("/practice/reset")
@@ -208,6 +231,52 @@ class ReachyMiniMetronome(ReachyMiniApp):
             else:
                 tracker.smoothing = val
             return {"smoothing": val}
+
+        # -----------------------------------------------------------
+        # MIDI API Endpoints
+        # -----------------------------------------------------------
+
+        @self.settings_app.get("/midi/ports")
+        def get_midi_ports() -> dict:
+            return {"ports": midi_handler.list_ports()}
+
+        @self.settings_app.post("/midi/start")
+        def start_midi(data: MidiPortSelect) -> dict:
+            nonlocal midi_enabled
+            ok = midi_handler.open(data.port_name)
+            midi_enabled = ok
+            return {"enabled": ok, "port": midi_handler.port_name}
+
+        @self.settings_app.post("/midi/stop")
+        def stop_midi() -> dict:
+            nonlocal midi_enabled
+            midi_handler.close()
+            midi_enabled = False
+            # Reset body and head to neutral
+            reachy_mini.set_target(body_yaw=0.0)
+            if not tracking_enabled:
+                head_pose = create_head_pose(yaw=0, pitch=0, degrees=True)
+                reachy_mini.set_target(head=head_pose)
+            return {"enabled": False}
+
+        @self.settings_app.get("/midi/status")
+        def get_midi_status() -> dict:
+            return {
+                "enabled": midi_enabled,
+                "port": midi_handler.port_name,
+                "last_note": midi_handler.last_note,
+                "last_note_name": midi_handler.last_note_name,
+                "last_velocity": midi_handler.last_velocity,
+                "body_yaw": round(midi_handler.body_pos, 1),
+                "head_pitch": round(midi_handler.head_pitch_pos, 1),
+                "notes_count": midi_handler.notes_count,
+                "amplitude": round(midi_handler.amplitude_mult, 2),
+            }
+
+        @self.settings_app.post("/midi/amplitude")
+        def set_midi_amplitude(data: MidiAmplitude) -> dict:
+            midi_handler.amplitude_mult = data.value
+            return {"amplitude": round(midi_handler.amplitude_mult, 2)}
 
         # -----------------------------------------------------------
         # Recording API Endpoints
@@ -284,9 +353,26 @@ class ReachyMiniMetronome(ReachyMiniApp):
                 except Exception:
                     pass  # Skip frame on camera error
 
+            # ── MIDI rhythm body/head motion ──
+            if midi_enabled and midi_handler.is_open:
+                body_yaw_deg, head_yaw_deg, head_pitch_deg = midi_handler.update(
+                    self.LOOP_INTERVAL
+                )
+                body_yaw_rad = np.deg2rad(body_yaw_deg)
+                reachy_mini.set_target(body_yaw=body_yaw_rad)
+                # Head: only if hand tracking is OFF (avoid conflict)
+                if not tracking_enabled:
+                    head_pose = create_head_pose(
+                        yaw=head_yaw_deg, pitch=head_pitch_deg, degrees=True
+                    )
+                    reachy_mini.set_target(head=head_pose)
+
             time.sleep(self.LOOP_INTERVAL)
 
         # Cleanup
+        if midi_enabled:
+            midi_handler.close()
+
         if recorder.state == recorder.STATE_RECORDING:
             recorder.stop()
 

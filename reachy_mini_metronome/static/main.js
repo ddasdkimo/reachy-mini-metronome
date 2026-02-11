@@ -25,10 +25,23 @@ const recStatus = document.getElementById('rec-status');
 const recElapsed = document.getElementById('rec-elapsed');
 const recList = document.getElementById('rec-list');
 
+// DOM Elements — MIDI
+const midiPortSelect = document.getElementById('midi-port-select');
+const midiRefreshBtn = document.getElementById('midi-refresh-btn');
+const midiToggleBtn = document.getElementById('midi-toggle-btn');
+const midiStatusEl = document.getElementById('midi-status');
+const midiNote = document.getElementById('midi-note');
+const midiVelocity = document.getElementById('midi-velocity');
+const midiBody = document.getElementById('midi-body');
+const midiNotesCount = document.getElementById('midi-notes-count');
+const midiAmpSlider = document.getElementById('midi-amp-slider');
+const midiAmpValue = document.getElementById('midi-amp-value');
+
 // State
 let isRunning = false;
 let isTracking = false;
 let isRecording = false;
+let isMidiConnected = false;
 let recState = 'idle';
 let statusPollInterval = null;
 
@@ -176,6 +189,76 @@ async function deleteRecording(filename) {
     } catch (e) { console.error('deleteRecording:', e); }
 }
 
+// ── MIDI API ──
+
+async function loadMidiPorts() {
+    try {
+        const r = await fetch('/midi/ports');
+        const d = await r.json();
+        const ports = d.ports || [];
+        midiPortSelect.innerHTML = '<option value="">Select MIDI Device...</option>';
+        ports.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p;
+            opt.textContent = p;
+            midiPortSelect.appendChild(opt);
+        });
+    } catch (e) { console.error('loadMidiPorts:', e); }
+}
+
+async function connectMidi() {
+    const port = midiPortSelect.value;
+    if (!port) return;
+    try {
+        const r = await fetch('/midi/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ port_name: port })
+        });
+        const d = await r.json();
+        isMidiConnected = d.enabled;
+        updateMidiUI();
+        if (isMidiConnected) startStatusPolling();
+    } catch (e) { console.error('connectMidi:', e); }
+}
+
+async function disconnectMidi() {
+    try {
+        await fetch('/midi/stop', { method: 'POST' });
+        isMidiConnected = false;
+        updateMidiUI();
+        if (!isRunning && !isTracking && !isRecording) stopStatusPolling();
+    } catch (e) { console.error('disconnectMidi:', e); }
+}
+
+async function setMidiAmplitude(val) {
+    try {
+        await fetch('/midi/amplitude', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: val })
+        });
+    } catch (e) { console.error('setMidiAmplitude:', e); }
+}
+
+function updateMidiUI() {
+    if (isMidiConnected) {
+        midiToggleBtn.classList.add('active');
+        midiToggleBtn.querySelector('.midi-btn-text').textContent = 'Disconnect';
+        midiStatusEl.textContent = 'ON';
+        midiStatusEl.className = 'midi-status on';
+    } else {
+        midiToggleBtn.classList.remove('active');
+        midiToggleBtn.querySelector('.midi-btn-text').textContent = 'Connect';
+        midiStatusEl.textContent = 'OFF';
+        midiStatusEl.className = 'midi-status';
+        midiNote.textContent = '--';
+        midiVelocity.textContent = '--';
+        midiBody.textContent = '0.0\u00b0';
+        midiNotesCount.textContent = '0';
+    }
+}
+
 function renderRecList(files) {
     if (!files.length) {
         recList.innerHTML = '<div class="rec-empty">No recordings yet</div>';
@@ -225,6 +308,7 @@ let _prevBeat = null;
 let _prevSession = '';
 let _prevTotal = '';
 let _prevCount = '';
+let _prevMidi = null;
 
 async function getStatus() {
     try {
@@ -284,7 +368,7 @@ async function getStatus() {
                 // Saving just finished → refresh recording list
                 if (_prevRecState === 'saving' && rs === 'idle') {
                     loadRecordings();
-                    if (!isRunning && !isTracking) stopStatusPolling();
+                    if (!isRunning && !isTracking && !isMidiConnected) stopStatusPolling();
                 }
                 _prevRecState = rs;
                 recState = rs;
@@ -298,6 +382,30 @@ async function getStatus() {
                     recElapsed.textContent = et;
                 }
             }
+        }
+
+        // MIDI — only update DOM when changed
+        if (d.midi) {
+            const mc = d.midi;
+            if (!_prevMidi || _prevMidi.enabled !== mc.enabled) {
+                isMidiConnected = mc.enabled;
+                updateMidiUI();
+            }
+            if (mc.enabled) {
+                if (!_prevMidi || _prevMidi.last_note !== mc.last_note) {
+                    midiNote.textContent = mc.last_note_name || '--';
+                }
+                if (!_prevMidi || _prevMidi.last_velocity !== mc.last_velocity) {
+                    midiVelocity.textContent = mc.last_velocity || '--';
+                }
+                if (!_prevMidi || _prevMidi.body_yaw !== mc.body_yaw) {
+                    midiBody.textContent = mc.body_yaw + '\u00b0';
+                }
+                if (!_prevMidi || _prevMidi.notes_count !== mc.notes_count) {
+                    midiNotesCount.textContent = mc.notes_count;
+                }
+            }
+            _prevMidi = { ...mc };
         }
 
         return d;
@@ -411,6 +519,22 @@ smoothingSlider.addEventListener('change', e => {
     setSmoothing(parseInt(e.target.value) / 100);
 });
 
+// ── MIDI Event Listeners ──
+
+midiRefreshBtn.addEventListener('click', loadMidiPorts);
+
+midiToggleBtn.addEventListener('click', () => {
+    isMidiConnected ? disconnectMidi() : connectMidi();
+});
+
+midiAmpSlider.addEventListener('input', e => {
+    midiAmpValue.textContent = e.target.value + '%';
+});
+
+midiAmpSlider.addEventListener('change', e => {
+    setMidiAmplitude(parseInt(e.target.value) / 100);
+});
+
 // ── Init ──
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -449,8 +573,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateRecUI();
         }
 
-        if (isRunning || isTracking || isRecording) startStatusPolling();
+        if (status.midi) {
+            isMidiConnected = status.midi.enabled;
+            updateMidiUI();
+            if (status.midi.amplitude != null) {
+                const pct = Math.round(status.midi.amplitude * 100);
+                midiAmpSlider.value = pct;
+                midiAmpValue.textContent = pct + '%';
+            }
+        }
+
+        if (isRunning || isTracking || isRecording || isMidiConnected) startStatusPolling();
     }
 
     loadRecordings();
+    loadMidiPorts();
 });
